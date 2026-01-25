@@ -697,6 +697,28 @@
             color: #64748b;
         }
 
+        .modal-form select {
+            padding: 0.875rem 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+            cursor: pointer;
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+
+        .modal-form select:focus {
+            border-color: #3b82f6;
+        }
+
+        .modal-form select option {
+            background: #0a0e27;
+            color: white;
+        }
+
         .modal-form button {
             padding: 0.875rem;
             background: linear-gradient(90deg, #3b82f6, #2563eb);
@@ -991,6 +1013,15 @@
             <h2>App 正在最後測試中！</h2>
             <p>留下 Email，上線時我們將送你 30 天進階版會員。</p>
             <form class="modal-form" onsubmit="handleModalSubmit(event)">
+                <select id="platformSelect" required>
+                    <option value="">選擇您最想共享的平台</option>
+                    <option value="netflix">Netflix</option>
+                    <option value="spotify">Spotify</option>
+                    <option value="youtube">YouTube Premium</option>
+                    <option value="disney">Disney+</option>
+                    <option value="hbo">HBO Max</option>
+                    <option value="other">其他平台</option>
+                </select>
                 <input type="email" placeholder="輸入您的 Email" required>
                 <button type="submit">提交</button>
             </form>
@@ -1071,6 +1102,8 @@
         function handleModalSubmit(event) {
             event.preventDefault();
             const email = event.target.querySelector('input[type="email"]').value;
+            const platform = event.target.querySelector('select').value;
+            console.log('Platform selected:', platform);
             console.log('Email submitted:', email);
             alert('感謝您的訂閱！我們會在 App 上線時通知您。');
             closeModal();
