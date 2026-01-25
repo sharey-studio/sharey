@@ -1066,7 +1066,6 @@
         const freeJoinBtn = document.getElementById('freeJoinBtn');
         const navStartBtn = document.getElementById('navStartBtn');
         const upgradeBtn = document.getElementById('upgradeBtn');
-        const registerBtn = document.getElementById('registerBtn');
 
         // Open modal when any of these buttons is clicked
         freeJoinBtn.addEventListener('click', function() {
@@ -1078,11 +1077,6 @@
         });
 
         upgradeBtn.addEventListener('click', function() {
-            modal.classList.add('active');
-        });
-
-        registerBtn.addEventListener('click', function(e) {
-            e.preventDefault();
             modal.classList.add('active');
         });
 
