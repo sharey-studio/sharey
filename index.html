@@ -682,7 +682,7 @@
                 How to Share 幫你找到志同道合的夥伴，一起分攤訂閱費用，省下高達 75% 的開支！
             </p>
             <div class="hero-buttons">
-                <button class="btn-primary">
+                <button class="btn-primary" id="freeJoinBtn">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M5 12h14M12 5l7 7-7 7"/>
                     </svg>
@@ -807,7 +807,7 @@
                     <li>社群支援</li>
                     <li>基本通知功能</li>
                 </ul>
-                <button class="btn-secondary" id="freeStartBtn" style="width: 100%;">免費開始</button>
+                <button class="btn-secondary" style="width: 100%;">免費開始</button>
             </div>
             <div class="pricing-card featured">
                 <span class="pricing-badge">最受歡迎</span>
@@ -885,10 +885,10 @@
 
         // Modal functionality
         const modal = document.getElementById('emailModal');
-        const freeStartBtn = document.getElementById('freeStartBtn');
+        const freeJoinBtn = document.getElementById('freeJoinBtn');
 
         // Open modal when button is clicked
-        freeStartBtn.addEventListener('click', function() {
+        freeJoinBtn.addEventListener('click', function() {
             modal.classList.add('active');
         });
 
