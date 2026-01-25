@@ -435,6 +435,88 @@
             font-weight: bold;
         }
 
+        /* FAQ/Accordion Section */
+        .faq {
+            padding: 6rem 5%;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .accordion {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .accordion-item {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .accordion-item:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .accordion-header {
+            background: transparent;
+            width: 100%;
+            padding: 1.5rem;
+            border: none;
+            color: #ffffff;
+            font-size: 1.125rem;
+            font-weight: 500;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .accordion-header:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .accordion-header.active {
+            color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .accordion-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s;
+        }
+
+        .accordion-icon::before {
+            content: '+';
+            font-size: 1.5rem;
+            color: #3b82f6;
+        }
+
+        .accordion-header.active .accordion-icon::before {
+            content: '−';
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            padding: 0 1.5rem;
+            transition: all 0.3s ease;
+            color: #94a3b8;
+            line-height: 1.7;
+        }
+
+        .accordion-content.active {
+            max-height: 500px;
+            padding: 0 1.5rem 1.5rem 1.5rem;
+        }
+
         /* CTA Section */
         .cta {
             padding: 6rem 5%;
@@ -825,6 +907,65 @@
         </div>
     </section>
 
+    <!-- FAQ Section -->
+    <section class="faq" id="faq">
+        <div class="section-header">
+            <h2>常見問答</h2>
+            <p>解答您對 How to Share 的所有疑問</p>
+        </div>
+        <div class="accordion">
+            <div class="accordion-item">
+                <button class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>Q1：How to Share 如何確保我的金錢安全？</span>
+                    <span class="accordion-icon"></span>
+                </button>
+                <div class="accordion-content">
+                    <p>我們採用「信託管理」機制（或實名認證制度）。主揪必須經過身分驗證才能開團，且平台會根據歷史成團紀錄給予信用評等。對於高風險操作，系統會提供檢舉與補償機制，確保你的每一分錢都花在刀口上。</p>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <button class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>Q2：如果主揪突然更改密碼或關閉帳號怎麼辦？</span>
+                    <span class="accordion-icon"></span>
+                </button>
+                <div class="accordion-content">
+                    <p>別擔心！若發生帳號無法登入的情況，團員可以透過 App 內的一鍵檢舉功能反映。經核實後，我們會立即凍結該主揪的權限，並根據剩餘天數協助你進行退款或重新媒合新團。</p>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <button class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>Q3：Netflix 現在有「同住者限制」，這還能用嗎？</span>
+                    <span class="accordion-icon"></span>
+                </button>
+                <div class="accordion-content">
+                    <p>當然可以！我們的系統支援「地區標籤」與「方案類別」篩選。你可以優先尋找同地區的夥伴，或是選擇支援「額外成員」名額的方案。How to Share 會即時更新各平台的條款規則，並給予用戶最佳的揪團建議。</p>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <button class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>Q4：我需要把自己的帳號密碼提供給平台嗎？</span>
+                    <span class="accordion-icon"></span>
+                </button>
+                <div class="accordion-content">
+                    <p>不需要。How to Share 僅作為「媒合與帳務管理」平台。帳號資訊將由主揪與團員在內建的加密聊天室中安全交換，平台不會儲存您的串流平台密碼。</p>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <button class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>Q5：這個 App 是免費使用的嗎？</span>
+                    <span class="accordion-icon"></span>
+                </button>
+                <div class="accordion-content">
+                    <p>基本的揪團與媒合功能是完全免費的！未來我們僅會針對「自動代收付」或「進階信用保障」功能收取極低比例的手續費，用以維護平台營運與用戶保障基金。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- CTA Section -->
     <section class="cta">
         <div class="cta-box">
@@ -912,6 +1053,29 @@
             alert('感謝您的訂閱！我們會在 App 上線時通知您。');
             closeModal();
             event.target.reset();
+        }
+
+        // Accordion functionality
+        function toggleAccordion(header) {
+            const content = header.nextElementSibling;
+            const allHeaders = document.querySelectorAll('.accordion-header');
+            const allContents = document.querySelectorAll('.accordion-content');
+
+            // Close all other accordions
+            allHeaders.forEach(h => {
+                if (h !== header) {
+                    h.classList.remove('active');
+                }
+            });
+            allContents.forEach(c => {
+                if (c !== content) {
+                    c.classList.remove('active');
+                }
+            });
+
+            // Toggle current accordion
+            header.classList.toggle('active');
+            content.classList.toggle('active');
         }
     </script>
     </script>
