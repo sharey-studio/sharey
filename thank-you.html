@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>感謝加入 Sharey | 冒險即將開始</title>
+    <link rel="stylesheet" href="style.css"> <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+            --accent-color: #00f2fe;
+        }
+
+        body {
+            background-color: #0b0f1a;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .thanks-container {
+            text-align: center;
+            max-width: 600px;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .icon-box {
+            font-size: 50px;
+            margin-bottom: 20px;
+            display: inline-block;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        h1 {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #a0aec0;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .status-badge {
+            background: rgba(0, 242, 254, 0.1);
+            color: var(--accent-color);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-bottom: 30px;
+            border: 1px solid var(--accent-color);
+        }
+
+        .survey-section {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        /* 這裡放 Google 表單的容器 */
+        .iframe-container {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 120%; /* 調整這個比例來適應你的表單高度 */
+            overflow: hidden;
+            border-radius: 12px;
+        }
+
+        .iframe-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        .back-home {
+            margin-top: 30px;
+            display: inline-block;
+            color: #718096;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        .back-home:hover {
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="thanks-container">
+        <div class="icon-box">🚀</div>
+        <h1>登機成功！</h1>
+        <div class="status-badge">已鎖定優先體驗席位</div>
+        
+        <p>感謝你加入 Sharey 的第一批成員。我們正在調整最後的引擎。為了提供最好的共享體驗，請幫我們解鎖最後一個任務：</p>
+
+        <div class="survey-section">
+            <h3>📝 快速需求調查</h3>
+            <div class="iframe-container">
+                <iframe src="https://docs.google.com/forms/d/e/你的表單ID/viewform?embedded=true">載入中…</iframe>
+            </div>
+        </div>
+
+        <a href="index.html" class="back-home">← 回到首頁</a>
+    </div>
+
+</body>
+</html>
