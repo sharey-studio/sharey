@@ -235,6 +235,28 @@
             fill: #94a3b8;
         }
 
+        .platforms-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+        .suggest-platform-btn {
+            background: transparent;
+            color: #3b82f6;
+            border: 1px solid #3b82f6;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .suggest-platform-btn:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: #2563eb;
+        }
+
         /* Features Section */
         .features {
             padding: 6rem 5%;
@@ -820,6 +842,9 @@
                         <svg viewBox="0 0 24 24"><path d="M7.042 16.896H4.414v-3.754H2.708v3.754H.01L0 7.22h2.708v3.6h1.706v-3.6h2.628zm12.043.046C21.795 16.94 24 14.689 24 11.978a4.89 4.89 0 0 0-4.915-4.92c-2.707-.002-4.09 1.991-4.432 2.795.003-1.207-1.187-2.632-2.975-2.632-1.199 0-2.652.851-3.163 2.065V7.203H5.759v9.682h2.708V11.82c0-1.678.939-1.905 1.39-1.905.451 0 1.39.227 1.39 1.905v5.065h2.708v-4.674c0-.463.94-.463 1.39-.463.451 0 1.39 0 1.39 1.927v3.21h2.708v-4.674c0-2.394 1.57-2.857 2.394-2.857.825 0 2.395.463 2.395 2.857 0 2.394-1.57 2.857-2.395 2.857h-2.752z"/></svg>
                     </div>
                 </div>
+                <div class="platforms-footer">
+                    <button class="suggest-platform-btn" id="suggestPlatformBtn">沒看到你想共享的平台？告訴我們！</button>
+                </div>
             </div>
         </div>
     </section>
@@ -1028,6 +1053,20 @@
         </div>
     </div>
 
+    <!-- Suggest Platform Modal -->
+    <div id="suggestModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeSuggestModal()">&times;</button>
+            <h2>沒看到你想共享的平台？</h2>
+            <p>告訴我們你想要的平台，我們會盡快支援！</p>
+            <form class="modal-form" onsubmit="handleSuggestSubmit(event)">
+                <input type="text" placeholder="輸入平台名稱（例如：Apple TV+）" required>
+                <input type="email" placeholder="輸入您的 Email" required>
+                <button type="submit">提交建議</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer>
         <div class="footer-links">
@@ -1085,10 +1124,27 @@
             modal.classList.remove('active');
         }
 
+        // Close suggest modal function
+        function closeSuggestModal() {
+            const suggestModal = document.getElementById('suggestModal');
+            suggestModal.classList.remove('active');
+        }
+
+        // Suggest platform button
+        const suggestPlatformBtn = document.getElementById('suggestPlatformBtn');
+        const suggestModal = document.getElementById('suggestModal');
+
+        suggestPlatformBtn.addEventListener('click', function() {
+            suggestModal.classList.add('active');
+        });
+
         // Close modal when clicking outside the modal content
         window.addEventListener('click', function(event) {
             if (event.target == modal) {
                 closeModal();
+            }
+            if (event.target == suggestModal) {
+                closeSuggestModal();
             }
         });
 
@@ -1101,6 +1157,18 @@
             console.log('Email submitted:', email);
             alert('感謝您的訂閱！我們會在 App 上線時通知您。');
             closeModal();
+            event.target.reset();
+        }
+
+        // Handle suggest platform submission
+        function handleSuggestSubmit(event) {
+            event.preventDefault();
+            const platformName = event.target.querySelector('input[type="text"]').value;
+            const email = event.target.querySelector('input[type="email"]').value;
+            console.log('Platform suggestion:', platformName);
+            console.log('Email:', email);
+            alert('感謝您的建議！我們會認真考慮並盡快支援這個平台。');
+            closeSuggestModal();
             event.target.reset();
         }
 
