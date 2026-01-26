@@ -1061,7 +1061,6 @@
             <p>告訴我們你想要的平台，我們會盡快支援！</p>
             <form class="modal-form" onsubmit="handleSuggestSubmit(event)">
                 <input type="text" placeholder="輸入平台名稱（例如：Apple TV+）" required>
-                <input type="email" placeholder="輸入您的 Email" required>
                 <button type="submit">提交建議</button>
             </form>
         </div>
@@ -1164,9 +1163,7 @@
         function handleSuggestSubmit(event) {
             event.preventDefault();
             const platformName = event.target.querySelector('input[type="text"]').value;
-            const email = event.target.querySelector('input[type="email"]').value;
             console.log('Platform suggestion:', platformName);
-            console.log('Email:', email);
             alert('感謝您的建議！我們會認真考慮並盡快支援這個平台。');
             closeSuggestModal();
             event.target.reset();
