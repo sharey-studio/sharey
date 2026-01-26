@@ -758,6 +758,19 @@
             box-shadow: 0 10px 40px rgba(59, 130, 246, 0.4);
         }
 
+        /* Thank You Modal Emoji */
+        .modal-content .emoji {
+            font-size: 60px;
+            margin-bottom: 15px;
+            display: inline-block;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .hero h1 {
@@ -1067,6 +1080,17 @@
         </div>
     </div>
 
+    <!-- Thank You Modal -->
+    <div id="thankYouModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeThankYouModal()">&times;</button>
+            <div class="emoji">🎉</div>
+            <h2>感謝你的訂閱！</h2>
+            <p>我們已收到您的資訊，將在 Sharey 正式上線時通知您。</p>
+            <p style="margin-top: 1rem; color: #3b82f6;">敬請期待 🚀</p>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer>
         <div class="footer-links">
@@ -1146,6 +1170,10 @@
             if (event.target == suggestModal) {
                 closeSuggestModal();
             }
+            const thankYouModal = document.getElementById('thankYouModal');
+            if (event.target == thankYouModal) {
+                closeThankYouModal();
+            }
         });
 
         // Accordion functionality
@@ -1207,19 +1235,50 @@
             }
         });
 
-        // 表單提交攔截 - 在提交後立即重定向到感謝頁面
+        // Close thank you modal function
+        function closeThankYouModal() {
+            const thankYouModal = document.getElementById('thankYouModal');
+            thankYouModal.classList.remove('active');
+        }
+
+        // 表單提交攔截 - 使用 AJAX 提交並顯示感謝彈窗
         document.addEventListener('submit', function(event) {
             const form = event.target;
-            
+
             // 檢查是否是 Formspree 表單
             if (form.action.includes('formspree.io')) {
-                // 延遲 500ms 後重定向，確保表單已提交
-                setTimeout(function() {
-                    window.location.href = 'thank-you.html';
-                }, 500);
+                event.preventDefault(); // 阻止默認提交行為
+
+                // 使用 fetch API 提交表單
+                fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                }).then(response => {
+                    if (response.ok) {
+                        // 提交成功，關閉當前 modal 並顯示感謝彈窗
+                        closeModal();
+                        closeSuggestModal();
+
+                        // 顯示感謝彈窗
+                        const thankYouModal = document.getElementById('thankYouModal');
+                        thankYouModal.classList.add('active');
+
+                        // 重置表單
+                        form.reset();
+                    } else {
+                        // 提交失敗，顯示錯誤訊息
+                        alert('提交失敗，請稍後再試');
+                    }
+                }).catch(error => {
+                    // 網絡錯誤
+                    alert('提交失敗，請檢查您的網絡連接');
+                    console.error('Form submission error:', error);
+                });
             }
         }, true);
-    </script>
     </script>
 </body>
 </html>
