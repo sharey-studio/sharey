@@ -847,7 +847,7 @@
             gap: 1rem;
         }
 
-        .survey-skip {
+        .survey-back {
             background: transparent;
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: #94a3b8;
@@ -859,10 +859,14 @@
             font-weight: 500;
         }
 
-        .survey-skip:hover {
+        .survey-back:hover {
             background: rgba(255, 255, 255, 0.05);
             border-color: rgba(255, 255, 255, 0.3);
             color: #cbd5e1;
+        }
+
+        .survey-back.hidden {
+            display: none;
         }
 
         .survey-next {
@@ -928,7 +932,7 @@
                 width: 100%;
             }
 
-            .survey-skip {
+            .survey-back {
                 width: 100%;
             }
         }
@@ -1314,7 +1318,7 @@
 
             <!-- Survey Navigation -->
             <div class="survey-nav">
-                <button class="survey-skip" onclick="skipSurvey()">略過</button>
+                <button class="survey-back" onclick="previousSurveyStep()">上一步</button>
                 <button class="survey-next" onclick="nextSurveyStep()">下一步</button>
             </div>
         </div>
@@ -1498,13 +1502,46 @@
             });
             document.querySelector('.survey-step[data-step="0"]').classList.add('active');
 
-            // Show navigation buttons
+            // Show navigation buttons and hide back button on first step
             document.querySelector('.survey-nav').style.display = 'flex';
+            document.querySelector('.survey-back').classList.add('hidden');
+            document.querySelector('.survey-next').textContent = '下一步';
         }
 
-        // Skip survey
-        function skipSurvey() {
-            closeThankYouModal();
+        // Previous survey step
+        function previousSurveyStep() {
+            const steps = document.querySelectorAll('.survey-step');
+
+            if (currentSurveyStep > 0) {
+                steps[currentSurveyStep].classList.remove('active');
+                currentSurveyStep--;
+                steps[currentSurveyStep].classList.add('active');
+
+                // Update button states
+                updateNavigationButtons();
+            }
+        }
+
+        // Update navigation buttons based on current step
+        function updateNavigationButtons() {
+            const steps = document.querySelectorAll('.survey-step');
+            const totalSteps = steps.length - 1;
+            const backBtn = document.querySelector('.survey-back');
+            const nextBtn = document.querySelector('.survey-next');
+
+            // Hide back button on first step (step 0)
+            if (currentSurveyStep === 0) {
+                backBtn.classList.add('hidden');
+            } else {
+                backBtn.classList.remove('hidden');
+            }
+
+            // Update next button text
+            if (currentSurveyStep === totalSteps - 1) {
+                nextBtn.textContent = '完成';
+            } else {
+                nextBtn.textContent = '下一步';
+            }
         }
 
         // Next survey step
@@ -1542,8 +1579,7 @@
                 currentSurveyStep++;
                 steps[currentSurveyStep].classList.add('active');
 
-                // Update button text
-                const nextBtn = document.querySelector('.survey-next');
+                // Update button states
                 if (currentSurveyStep === totalSteps) {
                     // On last step (completion), hide navigation and auto-close after delay
                     document.querySelector('.survey-nav').style.display = 'none';
@@ -1555,18 +1591,8 @@
                     setTimeout(() => {
                         closeThankYouModal();
                     }, 3000);
-                } else if (currentSurveyStep === totalSteps - 1) {
-                    nextBtn.textContent = '完成';
                 } else {
-                    nextBtn.textContent = '下一步';
-                }
-
-                // Hide skip button on first step
-                const skipBtn = document.querySelector('.survey-skip');
-                if (currentSurveyStep === 0) {
-                    skipBtn.style.display = 'block';
-                } else {
-                    skipBtn.style.display = 'block';
+                    updateNavigationButtons();
                 }
             }
         }
