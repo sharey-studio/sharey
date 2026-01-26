@@ -1,46 +1,79 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>感謝加入 Sharey | 冒險即將開始</title>
-    <link rel="stylesheet" href="style.css"> <style>
-        :root {
-            --primary-gradient: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
-            --accent-color: #00f2fe;
+    <title>感謝您加入 Sharey</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            background-color: #0b0f1a;
-            color: white;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Noto Sans TC', sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f4e 50%, #0d1333 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            overflow-x: hidden;
         }
 
-        .thanks-container {
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 40%, rgba(14, 165, 233, 0.05) 0%, transparent 40%);
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-5%, -5%); }
+        }
+
+        .thanks-box {
             text-align: center;
             max-width: 600px;
-            padding: 40px 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 24px;
+            padding: 60px 40px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
             border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(10px);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            animation: fadeIn 0.8s ease-out;
+            animation: slideUp 0.8s ease-out;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .icon-box {
-            font-size: 50px;
+        .emoji {
+            font-size: 80px;
             margin-bottom: 20px;
             display: inline-block;
             animation: bounce 2s infinite;
@@ -48,92 +81,107 @@
 
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            50% { transform: translateY(-20px); }
         }
 
         h1 {
-            background: var(--primary-gradient);
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            background: linear-gradient(90deg, #3b82f6, #06b6d4);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+            background-clip: text;
         }
 
-        p {
-            color: #a0aec0;
-            line-height: 1.6;
-            margin-bottom: 30px;
+        .subtitle {
+            font-size: 1.125rem;
+            color: #94a3b8;
+            margin-bottom: 20px;
         }
 
-        .status-badge {
-            background: rgba(0, 242, 254, 0.1);
-            color: var(--accent-color);
-            padding: 8px 16px;
+        .message {
+            font-size: 1rem;
+            color: #cbd5e1;
+            line-height: 1.8;
+            margin: 30px 0;
+        }
+
+        .status {
+            display: inline-block;
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.5);
+            color: #60a5fa;
+            padding: 12px 24px;
             border-radius: 50px;
             font-size: 0.9rem;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+
+        .back-btn {
             display: inline-block;
-            margin-bottom: 30px;
-            border: 1px solid var(--accent-color);
-        }
-
-        .survey-section {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 16px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-
-        /* 這裡放 Google 表單的容器 */
-        .iframe-container {
-            position: relative;
-            width: 100%;
-            height: 0;
-            padding-bottom: 120%; /* 調整這個比例來適應你的表單高度 */
-            overflow: hidden;
-            border-radius: 12px;
-        }
-
-        .iframe-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: 0;
-        }
-
-        .back-home {
             margin-top: 30px;
-            display: inline-block;
-            color: #718096;
+            padding: 12px 30px;
+            background: linear-gradient(90deg, #3b82f6, #2563eb);
+            color: white;
             text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.3s;
+            border-radius: 12px;
+            transition: all 0.3s;
+            font-weight: 500;
         }
 
-        .back-home:hover {
-            color: white;
+        .back-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+        }
+
+        .countdown {
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        @media (max-width: 768px) {
+            .thanks-box {
+                padding: 40px 30px;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+
+            .emoji {
+                font-size: 60px;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="bg-animation"></div>
 
-    <div class="thanks-container">
-        <div class="icon-box">🚀</div>
-        <h1>登機成功！</h1>
-        <div class="status-badge">已鎖定優先體驗席位</div>
-        
-        <p>感謝你加入 Sharey 的第一批成員。我們正在調整最後的引擎。為了提供最好的共享體驗，請幫我們解鎖最後一個任務：</p>
+    <div class="thanks-box">
+        <div class="emoji">🎉</div>
+        <h1>感謝您的加入！</h1>
+        <p class="subtitle">您已成功預約 Sharey 優先體驗</p>
 
-        <div class="survey-section">
-            <h3>📝 快速需求調查</h3>
-            <div class="iframe-container">
-                <iframe src="https://docs.google.com/forms/d/e/你的表單ID/viewform?embedded=true">載入中…</iframe>
-            </div>
-        </div>
+        <div class="status">✓ 已鎖定優先體驗席位</div>
 
-        <a href="index.html" class="back-home">← 回到首頁</a>
+        <p class="message">
+            感謝您成為 Sharey 的早期支持者！我們正在準備為您帶來最佳的訂閱共享體驗。
+            您將在應用正式上線時收到專屬邀請和 30 天進階版會員權益。
+        </p>
+
+        <p style="color: #94a3b8;">敬請期待 🚀</p>
+
+        <a href="index.html" class="back-btn">返回首頁</a>
+        <p class="countdown">5 秒後自動返回...</p>
     </div>
 
+    <script>
+        // 5 秒後自動返回首頁
+        setTimeout(function() {
+            window.location.href = 'index.html';
+        }, 5000);
+    </script>
 </body>
 </html>
