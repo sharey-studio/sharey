@@ -771,6 +771,124 @@
             50% { transform: translateY(-15px); }
         }
 
+        /* Survey Steps */
+        .survey-step {
+            display: none;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .survey-step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .survey-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin: 1.5rem 0;
+        }
+
+        .survey-option {
+            display: flex;
+            align-items: center;
+            padding: 0.875rem 1.25rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .survey-option:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .survey-option input[type="radio"] {
+            margin-right: 0.75rem;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #3b82f6;
+        }
+
+        .survey-option input[type="radio"]:checked + span {
+            color: #3b82f6;
+            font-weight: 500;
+        }
+
+        .survey-option input[type="radio"]:checked {
+            background: #3b82f6;
+        }
+
+        .survey-option span {
+            color: #cbd5e1;
+            font-size: 1rem;
+            transition: color 0.3s;
+        }
+
+        /* Survey Navigation */
+        .survey-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+            gap: 1rem;
+        }
+
+        .survey-skip {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #94a3b8;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .survey-skip:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.3);
+            color: #cbd5e1;
+        }
+
+        .survey-next {
+            background: linear-gradient(90deg, #3b82f6, #2563eb);
+            border: none;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            font-weight: 500;
+            margin-left: auto;
+        }
+
+        .survey-next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+        }
+
+        .survey-next:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .hero h1 {
@@ -799,6 +917,19 @@
 
             .modal-content h2 {
                 font-size: 1.5rem;
+            }
+
+            .survey-nav {
+                flex-direction: column-reverse;
+            }
+
+            .survey-next {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .survey-skip {
+                width: 100%;
             }
         }
     </style>
@@ -1080,14 +1211,112 @@
         </div>
     </div>
 
-    <!-- Thank You Modal -->
+    <!-- Thank You Modal with Survey -->
     <div id="thankYouModal" class="modal">
         <div class="modal-content">
             <button class="modal-close" onclick="closeThankYouModal()">&times;</button>
-            <div class="emoji">🎉</div>
-            <h2>感謝你的訂閱！</h2>
-            <p>我們已收到您的資訊，將在 Sharey 正式上線時通知您。</p>
-            <p style="margin-top: 1rem; color: #3b82f6;">敬請期待 🚀</p>
+
+            <!-- Step 0: Thank You Message -->
+            <div class="survey-step active" data-step="0">
+                <div class="emoji">🎉</div>
+                <h2>感謝你的訂閱！</h2>
+                <p>我們已收到您的資訊，將在 Sharey 正式上線時通知您。</p>
+                <p style="margin-top: 1rem; color: #3b82f6;">敬請期待 🚀</p>
+            </div>
+
+            <!-- Step 1: Question 1 -->
+            <div class="survey-step" data-step="1">
+                <h2>你最想共享哪個服務？</h2>
+                <div class="survey-options">
+                    <label class="survey-option">
+                        <input type="radio" name="service" value="Netflix">
+                        <span>Netflix</span>
+                    </label>
+                    <label class="survey-option">
+                        <input type="radio" name="service" value="Spotify">
+                        <span>Spotify</span>
+                    </label>
+                    <label class="survey-option">
+                        <input type="radio" name="service" value="YouTube Premium">
+                        <span>YouTube Premium</span>
+                    </label>
+                    <label class="survey-option">
+                        <input type="radio" name="service" value="Disney+">
+                        <span>Disney+</span>
+                    </label>
+                    <label class="survey-option">
+                        <input type="radio" name="service" value="其他">
+                        <span>其他</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Step 2: Question 2 -->
+            <div class="survey-step" data-step="2">
+                <h2>你最擔心共享時發生什麼事？</h2>
+                <div class="survey-options">
+                    <label class="survey-option">
+                        <input type="radio" name="concern" value="帳號安全問題">
+                        <span>帳號安全問題</span>
+                    </label>
+                    <label class="survey-option">
+                        <input type="radio" name="concern" value="成員突然退出">
+                        <span>成員突然退出</span>
+                    </label>
+                    <label class="survey-option">
+                        <input type="radio" name="concern" value="付款糾紛">
+                        <span>付款糾紛</span>
+                    </label>
+                    <label class="survey-option">
+                        <input type="radio" name="concern" value="密碼被更改">
+                        <span>密碼被更改</span>
+                    </label>
+                    <label class="survey-option">
+                        <input type="radio" name="concern" value="其他">
+                        <span>其他</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Step 3: Question 3 -->
+            <div class="survey-step" data-step="3">
+                <h2>你願意每個月支付多少平台服務費？</h2>
+                <div class="survey-options">
+                    <label class="survey-option">
+                        <input type="radio" name="fee" value="$0（完全免費）">
+                        <span>$0（完全免費）</span>
+                    </label>
+                    <label class="survey-option">
+                        <input type="radio" name="fee" value="$1-20">
+                        <span>$1-20</span>
+                    </label>
+                    <label class="survey-option">
+                        <input type="radio" name="fee" value="$21-50">
+                        <span>$21-50</span>
+                    </label>
+                    <label class="survey-option">
+                        <input type="radio" name="fee" value="$51-100">
+                        <span>$51-100</span>
+                    </label>
+                    <label class="survey-option">
+                        <input type="radio" name="fee" value="$100以上">
+                        <span>$100以上</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Step 4: Completion Message -->
+            <div class="survey-step" data-step="4">
+                <div class="emoji">✨</div>
+                <h2>感謝您的回饋！</h2>
+                <p>您的意見對我們非常重要，將幫助我們打造更好的服務。</p>
+            </div>
+
+            <!-- Survey Navigation -->
+            <div class="survey-nav">
+                <button class="survey-skip" onclick="skipSurvey()">略過</button>
+                <button class="survey-next" onclick="nextSurveyStep()">下一步</button>
+            </div>
         </div>
     </div>
 
@@ -1235,10 +1464,136 @@
             }
         });
 
+        // Survey state
+        let currentSurveyStep = 0;
+        const surveyData = {
+            service: '',
+            concern: '',
+            fee: ''
+        };
+
         // Close thank you modal function
         function closeThankYouModal() {
             const thankYouModal = document.getElementById('thankYouModal');
             thankYouModal.classList.remove('active');
+            // Reset survey
+            resetSurvey();
+        }
+
+        // Reset survey to initial state
+        function resetSurvey() {
+            currentSurveyStep = 0;
+            surveyData.service = '';
+            surveyData.concern = '';
+            surveyData.fee = '';
+
+            // Reset all radio buttons
+            document.querySelectorAll('.survey-step input[type="radio"]').forEach(radio => {
+                radio.checked = false;
+            });
+
+            // Show first step
+            document.querySelectorAll('.survey-step').forEach(step => {
+                step.classList.remove('active');
+            });
+            document.querySelector('.survey-step[data-step="0"]').classList.add('active');
+
+            // Show navigation buttons
+            document.querySelector('.survey-nav').style.display = 'flex';
+        }
+
+        // Skip survey
+        function skipSurvey() {
+            closeThankYouModal();
+        }
+
+        // Next survey step
+        function nextSurveyStep() {
+            const steps = document.querySelectorAll('.survey-step');
+            const totalSteps = steps.length - 1;
+
+            // Validate current step if it's a question step
+            if (currentSurveyStep === 1) {
+                const selected = document.querySelector('input[name="service"]:checked');
+                if (!selected) {
+                    alert('請選擇一個選項');
+                    return;
+                }
+                surveyData.service = selected.value;
+            } else if (currentSurveyStep === 2) {
+                const selected = document.querySelector('input[name="concern"]:checked');
+                if (!selected) {
+                    alert('請選擇一個選項');
+                    return;
+                }
+                surveyData.concern = selected.value;
+            } else if (currentSurveyStep === 3) {
+                const selected = document.querySelector('input[name="fee"]:checked');
+                if (!selected) {
+                    alert('請選擇一個選項');
+                    return;
+                }
+                surveyData.fee = selected.value;
+            }
+
+            // Move to next step
+            if (currentSurveyStep < totalSteps) {
+                steps[currentSurveyStep].classList.remove('active');
+                currentSurveyStep++;
+                steps[currentSurveyStep].classList.add('active');
+
+                // Update button text
+                const nextBtn = document.querySelector('.survey-next');
+                if (currentSurveyStep === totalSteps) {
+                    // On last step (completion), hide navigation and auto-close after delay
+                    document.querySelector('.survey-nav').style.display = 'none';
+
+                    // Submit survey data
+                    submitSurveyData();
+
+                    // Auto close after 3 seconds
+                    setTimeout(() => {
+                        closeThankYouModal();
+                    }, 3000);
+                } else if (currentSurveyStep === totalSteps - 1) {
+                    nextBtn.textContent = '完成';
+                } else {
+                    nextBtn.textContent = '下一步';
+                }
+
+                // Hide skip button on first step
+                const skipBtn = document.querySelector('.survey-skip');
+                if (currentSurveyStep === 0) {
+                    skipBtn.style.display = 'block';
+                } else {
+                    skipBtn.style.display = 'block';
+                }
+            }
+        }
+
+        // Submit survey data to Formspree
+        function submitSurveyData() {
+            const formData = new FormData();
+            formData.append('survey_service', surveyData.service);
+            formData.append('survey_concern', surveyData.concern);
+            formData.append('survey_fee', surveyData.fee);
+            formData.append('_subject', 'Sharey 問卷調查結果');
+
+            fetch('https://formspree.io/f/mqeqbakg', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            }).then(response => {
+                if (response.ok) {
+                    console.log('Survey submitted successfully');
+                } else {
+                    console.error('Survey submission failed');
+                }
+            }).catch(error => {
+                console.error('Survey submission error:', error);
+            });
         }
 
         // 表單提交攔截 - 使用 AJAX 提交並顯示感謝彈窗
@@ -1262,7 +1617,8 @@
                         closeModal();
                         closeSuggestModal();
 
-                        // 顯示感謝彈窗
+                        // 重置並顯示感謝彈窗
+                        resetSurvey();
                         const thankYouModal = document.getElementById('thankYouModal');
                         thankYouModal.classList.add('active');
 
