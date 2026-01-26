@@ -1024,8 +1024,8 @@
         <div class="cta-box">
             <h2>準備好開始省錢了嗎？</h2>
             <p>加入超過 <span id="userCounter">10,000</span>+ 用戶的行列，一起聰明消費</p>
-            <form class="cta-form">
-                <input type="email" placeholder="輸入您的 Email">
+            <form class="cta-form" action="https://formspree.io/f/mqeqbakg" method="POST">
+                <input type="email" name="email" placeholder="輸入您的 Email" required>
                 <button type="submit" class="btn-primary" id="registerBtn">立即註冊</button>
             </form>
         </div>
@@ -1037,8 +1037,8 @@
             <button class="modal-close" onclick="closeModal()">&times;</button>
             <h2>App 正在最後測試中！</h2>
             <p>留下 Email，上線時我們將送你 30 天進階版會員。</p>
-            <form class="modal-form" onsubmit="handleModalSubmit(event)">
-                <select id="platformSelect" required>
+            <form class="modal-form" action="https://formspree.io/f/mqeqbakg" method="POST">
+                <select name="platform" id="platformSelect" required>
                     <option value="">選擇您最想共享的平台</option>
                     <option value="netflix">Netflix</option>
                     <option value="spotify">Spotify</option>
@@ -1047,7 +1047,7 @@
                     <option value="hbo">HBO Max</option>
                     <option value="other">其他平台</option>
                 </select>
-                <input type="email" placeholder="輸入您的 Email" required>
+                <input type="email" name="email" placeholder="輸入您的 Email" required>
                 <button type="submit">提交</button>
             </form>
         </div>
@@ -1059,8 +1059,9 @@
             <button class="modal-close" onclick="closeSuggestModal()">&times;</button>
             <h2>沒看到你想共享的平台？</h2>
             <p>告訴我們你想要的平台，我們會盡快支援！</p>
-            <form class="modal-form" onsubmit="handleSuggestSubmit(event)">
-                <input type="text" placeholder="輸入平台名稱（例如：Apple TV+）" required>
+            <form class="modal-form" action="https://formspree.io/f/mqeqbakg" method="POST">
+                <input type="text" name="platform_suggestion" placeholder="輸入平台名稱（例如：Apple TV+）" required>
+                <input type="hidden" name="_subject" value="Sharey 平台建議">
                 <button type="submit">提交建議</button>
             </form>
         </div>
@@ -1146,28 +1147,6 @@
                 closeSuggestModal();
             }
         });
-
-        // Handle form submission
-        function handleModalSubmit(event) {
-            event.preventDefault();
-            const email = event.target.querySelector('input[type="email"]').value;
-            const platform = event.target.querySelector('select').value;
-            console.log('Platform selected:', platform);
-            console.log('Email submitted:', email);
-            alert('感謝您的訂閱！我們會在 App 上線時通知您。');
-            closeModal();
-            event.target.reset();
-        }
-
-        // Handle suggest platform submission
-        function handleSuggestSubmit(event) {
-            event.preventDefault();
-            const platformName = event.target.querySelector('input[type="text"]').value;
-            console.log('Platform suggestion:', platformName);
-            alert('感謝您的建議！我們會認真考慮並盡快支援這個平台。');
-            closeSuggestModal();
-            event.target.reset();
-        }
 
         // Accordion functionality
         function toggleAccordion(header) {
