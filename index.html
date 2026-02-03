@@ -1212,8 +1212,9 @@
         <div class="cta-box">
             <h2>準備好開始省錢了嗎？</h2>
             <p>加入超過 <span id="userCounter">10,000</span>+ 用戶的行列，一起聰明消費</p>
-            <form class="cta-form" action="https://formspree.io/f/mqeqbakg" method="POST">
+            <form class="cta-form" id="cta-form">
                 <input type="email" name="email" placeholder="輸入您的 Email" required>
+                <input type="hidden" name="form_type" value="cta_subscription">
                 <button type="submit" class="btn-primary" id="registerBtn">立即註冊</button>
             </form>
         </div>
@@ -1225,17 +1226,18 @@
             <button class="modal-close" onclick="closeModal()">&times;</button>
             <h2>App 正在最後測試中！</h2>
             <p>留下 Email，上線時我們將送你 30 天進階版會員。</p>
-            <form class="modal-form" action="https://formspree.io/f/mqeqbakg" method="POST">
+            <form class="modal-form" id="email-modal-form">
                 <select name="platform" id="platformSelect" required>
                     <option value="">選擇您最想共享的平台</option>
-                    <option value="netflix">Netflix</option>
-                    <option value="spotify">Spotify</option>
-                    <option value="youtube">YouTube Premium</option>
-                    <option value="disney">Disney+</option>
-                    <option value="hbo">HBO Max</option>
-                    <option value="other">其他平台</option>
+                    <option value="Netflix">Netflix</option>
+                    <option value="Spotify">Spotify</option>
+                    <option value="YouTube Premium">YouTube Premium</option>
+                    <option value="Disney+">Disney+</option>
+                    <option value="HBO Max">HBO Max</option>
+                    <option value="其他平台">其他平台</option>
                 </select>
                 <input type="email" name="email" placeholder="輸入您的 Email" required>
+                <input type="hidden" name="form_type" value="modal_subscription">
                 <button type="submit">提交</button>
             </form>
         </div>
@@ -1247,9 +1249,9 @@
             <button class="modal-close" onclick="closeSuggestModal()">&times;</button>
             <h2>沒看到你想共享的平台？</h2>
             <p>告訴我們你想要的平台，我們會盡快支援！</p>
-            <form class="modal-form" action="https://formspree.io/f/mqeqbakg" method="POST">
+            <form class="modal-form" id="suggest-form">
                 <input type="text" name="platform_suggestion" placeholder="輸入平台名稱（例如：Apple TV+）" required>
-                <input type="hidden" name="_subject" value="Sharey 平台建議">
+                <input type="hidden" name="form_type" value="platform_suggestion">
                 <button type="submit">提交建議</button>
             </form>
         </div>
@@ -1637,70 +1639,138 @@
             }
         }
 
-        // Submit survey data to Formspree
-        function submitSurveyData() {
-            const formData = new FormData();
-            formData.append('survey_service', surveyData.service);
-            formData.append('survey_concern', surveyData.concern);
-            formData.append('survey_fee', surveyData.fee);
-            formData.append('_subject', 'Sharey 問卷調查結果');
+        // ========== Google Sheets 整合 ==========
+        // 請將下方的 URL 替換為你的 Google Apps Script 網址
+        const GOOGLE_SCRIPT_URL = '你的_GOOGLE_APPS_SCRIPT_網址';
 
-            fetch('https://formspree.io/f/mqeqbakg', {
+        // 通用的表單提交函數
+        function submitToGoogleSheet(formData, onSuccess, onError) {
+            fetch(GOOGLE_SCRIPT_URL, {
                 method: 'POST',
-                body: formData,
-                headers: {
-                    'Accept': 'application/json'
-                }
-            }).then(response => {
-                if (response.ok) {
-                    console.log('Survey submitted successfully');
-                } else {
-                    console.error('Survey submission failed');
-                }
-            }).catch(error => {
-                console.error('Survey submission error:', error);
+                body: formData
+            })
+            .then(response => {
+                console.log('Success!', response);
+                if (onSuccess) onSuccess();
+            })
+            .catch(error => {
+                console.error('Error!', error.message);
+                if (onError) onError(error);
             });
         }
 
-        // 表單提交攔截 - 使用 AJAX 提交並顯示感謝彈窗
-        document.addEventListener('submit', function(event) {
-            const form = event.target;
+        // Submit survey data to Google Sheet
+        function submitSurveyData() {
+            const formData = new FormData();
+            formData.append('form_type', 'survey');
+            formData.append('survey_service', surveyData.service);
+            formData.append('survey_concern', surveyData.concern);
+            formData.append('survey_fee', surveyData.fee);
+            formData.append('timestamp', new Date().toISOString());
 
-            // 檢查是否是 Formspree 表單
-            if (form.action.includes('formspree.io')) {
-                event.preventDefault(); // 阻止默認提交行為
+            submitToGoogleSheet(formData,
+                () => console.log('Survey submitted successfully'),
+                (error) => console.error('Survey submission error:', error)
+            );
+        }
 
-                // 使用 fetch API 提交表單
-                fetch(form.action, {
-                    method: 'POST',
-                    body: new FormData(form),
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                }).then(response => {
-                    if (response.ok) {
-                        // 提交成功，關閉當前 modal 並顯示感謝彈窗
-                        closeModal();
-                        closeSuggestModal();
+        // 表單提交處理
+        document.addEventListener('DOMContentLoaded', function() {
+            // CTA 表單
+            const ctaForm = document.getElementById('cta-form');
+            if (ctaForm) {
+                ctaForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.innerText;
+                    submitBtn.innerText = '傳送中...';
+                    submitBtn.disabled = true;
 
-                        // 重置並顯示感謝彈窗
-                        resetSurvey();
-                        const thankYouModal = document.getElementById('thankYouModal');
-                        thankYouModal.classList.add('active');
+                    const formData = new FormData(this);
+                    formData.append('timestamp', new Date().toISOString());
 
-                        // 重置表單
-                        form.reset();
-                    } else {
-                        // 提交失敗，顯示錯誤訊息
-                        alert('提交失敗，請稍後再試');
-                    }
-                }).catch(error => {
-                    // 網絡錯誤
-                    alert('提交失敗，請檢查您的網絡連接');
-                    console.error('Form submission error:', error);
+                    submitToGoogleSheet(formData,
+                        () => {
+                            // 成功：顯示感謝彈窗
+                            resetSurvey();
+                            document.getElementById('thankYouModal').classList.add('active');
+                            ctaForm.reset();
+                            submitBtn.innerText = originalText;
+                            submitBtn.disabled = false;
+                        },
+                        (error) => {
+                            alert('提交失敗，請檢查網路連線後再試一次！');
+                            submitBtn.innerText = originalText;
+                            submitBtn.disabled = false;
+                        }
+                    );
                 });
             }
-        }, true);
+
+            // Email Modal 表單
+            const emailModalForm = document.getElementById('email-modal-form');
+            if (emailModalForm) {
+                emailModalForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.innerText;
+                    submitBtn.innerText = '傳送中...';
+                    submitBtn.disabled = true;
+
+                    const formData = new FormData(this);
+                    formData.append('timestamp', new Date().toISOString());
+
+                    submitToGoogleSheet(formData,
+                        () => {
+                            // 成功：關閉 modal，顯示感謝彈窗
+                            closeModal();
+                            resetSurvey();
+                            document.getElementById('thankYouModal').classList.add('active');
+                            emailModalForm.reset();
+                            submitBtn.innerText = originalText;
+                            submitBtn.disabled = false;
+                        },
+                        (error) => {
+                            alert('提交失敗，請檢查網路連線後再試一次！');
+                            submitBtn.innerText = originalText;
+                            submitBtn.disabled = false;
+                        }
+                    );
+                });
+            }
+
+            // Suggest Platform 表單
+            const suggestForm = document.getElementById('suggest-form');
+            if (suggestForm) {
+                suggestForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.innerText;
+                    submitBtn.innerText = '傳送中...';
+                    submitBtn.disabled = true;
+
+                    const formData = new FormData(this);
+                    formData.append('timestamp', new Date().toISOString());
+
+                    submitToGoogleSheet(formData,
+                        () => {
+                            // 成功：關閉 modal，顯示感謝彈窗
+                            closeSuggestModal();
+                            resetSurvey();
+                            document.getElementById('thankYouModal').classList.add('active');
+                            suggestForm.reset();
+                            submitBtn.innerText = originalText;
+                            submitBtn.disabled = false;
+                        },
+                        (error) => {
+                            alert('提交失敗，請檢查網路連線後再試一次！');
+                            submitBtn.innerText = originalText;
+                            submitBtn.disabled = false;
+                        }
+                    );
+                });
+            }
+        });
     </script>
 </body>
 </html>
