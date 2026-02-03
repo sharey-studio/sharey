@@ -1640,15 +1640,85 @@
         }
 
         // ========== Google Sheets 整合 ==========
-        // 請將下方的 URL 替換為你的 Google Apps Script 網址
-        const GOOGLE_SCRIPT_URL = '你的_GOOGLE_APPS_SCRIPT_網址';
+        // 1. 設定 Google Script 網址
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzBZpnBMQ_Py5YO_U5lSmwr0Xou2hVdiC25xkgg5Ns565r1ly_8E1vC_EzhDWFNIrrX1w/exec';
 
-        // 通用的表單提交函數
-        function submitToGoogleSheet(formData, onSuccess, onError) {
-            fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                body: formData
-            })
+        // 2. 建立物件來暫存用戶填寫的所有資料
+        let shareyUserData = {
+            form_type: 'Beta_Signup',
+            email: '',
+            platform: '',
+            platform_suggestion: '',
+            survey_service: '',
+            survey_concern: '',
+            survey_fee: '',
+            timestamp: ''
+        };
+
+        // 3. 重置用戶資料
+        function resetShareyUserData() {
+            shareyUserData = {
+                form_type: 'Beta_Signup',
+                email: '',
+                platform: '',
+                platform_suggestion: '',
+                survey_service: '',
+                survey_concern: '',
+                survey_fee: '',
+                timestamp: ''
+            };
+        }
+
+        // 4. 保存 Email 步驟資料
+        function saveEmailFromCTA() {
+            const emailInput = document.getElementById('cta-email');
+            if (emailInput && emailInput.value) {
+                shareyUserData.email = emailInput.value;
+                shareyUserData.form_type = 'CTA_Subscription';
+                shareyUserData.timestamp = new Date().toISOString();
+            }
+        }
+
+        function saveEmailFromModal() {
+            const emailInput = document.getElementById('modal-email');
+            const platformSelect = document.getElementById('modal-platform-select');
+            if (emailInput && emailInput.value) {
+                shareyUserData.email = emailInput.value;
+                shareyUserData.platform = platformSelect ? platformSelect.value : '';
+                shareyUserData.form_type = 'Modal_Subscription';
+                shareyUserData.timestamp = new Date().toISOString();
+            }
+        }
+
+        function savePlatformSuggestion() {
+            const suggestionInput = document.getElementById('suggest-platform-input');
+            if (suggestionInput && suggestionInput.value) {
+                shareyUserData.platform_suggestion = suggestionInput.value;
+                shareyUserData.form_type = 'Platform_Suggestion';
+                shareyUserData.timestamp = new Date().toISOString();
+            }
+        }
+
+        // 5. 保存問卷答案到 shareyUserData
+        function saveSurveyAnswers() {
+            shareyUserData.survey_service = surveyData.service;
+            shareyUserData.survey_concern = surveyData.concern;
+            shareyUserData.survey_fee = surveyData.fee;
+        }
+
+        // 6. 最後一步：發送所有資料到 Google Sheet
+        function submitAllDataToGoogleSheet(onSuccess, onError) {
+            // 保存問卷答案
+            saveSurveyAnswers();
+
+            // 建立要傳送的 FormData
+            const formData = new FormData();
+            for (let key in shareyUserData) {
+                formData.append(key, shareyUserData[key]);
+            }
+
+            // 正式發送
+            fetch(scriptURL, { method: 'POST', body: formData })
             .then(response => {
                 console.log('Success!', response);
                 if (onSuccess) onSuccess();
@@ -1659,51 +1729,36 @@
             });
         }
 
-        // Submit survey data to Google Sheet
+        // 7. 更新 submitSurveyData 函數
         function submitSurveyData() {
-            const formData = new FormData();
-            formData.append('form_type', 'survey');
-            formData.append('survey_service', surveyData.service);
-            formData.append('survey_concern', surveyData.concern);
-            formData.append('survey_fee', surveyData.fee);
-            formData.append('timestamp', new Date().toISOString());
-
-            submitToGoogleSheet(formData,
-                () => console.log('Survey submitted successfully'),
-                (error) => console.error('Survey submission error:', error)
+            submitAllDataToGoogleSheet(
+                () => console.log('All data submitted successfully'),
+                (error) => console.error('Submission error:', error)
             );
         }
 
-        // 表單提交處理
+        // 8. 表單提交處理
         document.addEventListener('DOMContentLoaded', function() {
             // CTA 表單
             const ctaForm = document.getElementById('cta-form');
             if (ctaForm) {
                 ctaForm.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    const submitBtn = this.querySelector('button[type="submit"]');
+                    const submitBtn = document.getElementById('cta-submit-btn');
                     const originalText = submitBtn.innerText;
                     submitBtn.innerText = '傳送中...';
                     submitBtn.disabled = true;
 
-                    const formData = new FormData(this);
-                    formData.append('timestamp', new Date().toISOString());
+                    // 重置並保存資料
+                    resetShareyUserData();
+                    saveEmailFromCTA();
 
-                    submitToGoogleSheet(formData,
-                        () => {
-                            // 成功：顯示感謝彈窗
-                            resetSurvey();
-                            document.getElementById('thankYouModal').classList.add('active');
-                            ctaForm.reset();
-                            submitBtn.innerText = originalText;
-                            submitBtn.disabled = false;
-                        },
-                        (error) => {
-                            alert('提交失敗，請檢查網路連線後再試一次！');
-                            submitBtn.innerText = originalText;
-                            submitBtn.disabled = false;
-                        }
-                    );
+                    // 成功：顯示感謝彈窗（資料會在問卷完成後一起發送）
+                    resetSurvey();
+                    document.getElementById('thankYouModal').classList.add('active');
+                    ctaForm.reset();
+                    submitBtn.innerText = originalText;
+                    submitBtn.disabled = false;
                 });
             }
 
@@ -1712,30 +1767,22 @@
             if (emailModalForm) {
                 emailModalForm.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    const submitBtn = this.querySelector('button[type="submit"]');
+                    const submitBtn = document.getElementById('modal-submit-btn');
                     const originalText = submitBtn.innerText;
                     submitBtn.innerText = '傳送中...';
                     submitBtn.disabled = true;
 
-                    const formData = new FormData(this);
-                    formData.append('timestamp', new Date().toISOString());
+                    // 重置並保存資料
+                    resetShareyUserData();
+                    saveEmailFromModal();
 
-                    submitToGoogleSheet(formData,
-                        () => {
-                            // 成功：關閉 modal，顯示感謝彈窗
-                            closeModal();
-                            resetSurvey();
-                            document.getElementById('thankYouModal').classList.add('active');
-                            emailModalForm.reset();
-                            submitBtn.innerText = originalText;
-                            submitBtn.disabled = false;
-                        },
-                        (error) => {
-                            alert('提交失敗，請檢查網路連線後再試一次！');
-                            submitBtn.innerText = originalText;
-                            submitBtn.disabled = false;
-                        }
-                    );
+                    // 成功：關閉 modal，顯示感謝彈窗（資料會在問卷完成後一起發送）
+                    closeModal();
+                    resetSurvey();
+                    document.getElementById('thankYouModal').classList.add('active');
+                    emailModalForm.reset();
+                    submitBtn.innerText = originalText;
+                    submitBtn.disabled = false;
                 });
             }
 
@@ -1744,30 +1791,22 @@
             if (suggestForm) {
                 suggestForm.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    const submitBtn = this.querySelector('button[type="submit"]');
+                    const submitBtn = document.getElementById('suggest-submit-btn');
                     const originalText = submitBtn.innerText;
                     submitBtn.innerText = '傳送中...';
                     submitBtn.disabled = true;
 
-                    const formData = new FormData(this);
-                    formData.append('timestamp', new Date().toISOString());
+                    // 重置並保存資料
+                    resetShareyUserData();
+                    savePlatformSuggestion();
 
-                    submitToGoogleSheet(formData,
-                        () => {
-                            // 成功：關閉 modal，顯示感謝彈窗
-                            closeSuggestModal();
-                            resetSurvey();
-                            document.getElementById('thankYouModal').classList.add('active');
-                            suggestForm.reset();
-                            submitBtn.innerText = originalText;
-                            submitBtn.disabled = false;
-                        },
-                        (error) => {
-                            alert('提交失敗，請檢查網路連線後再試一次！');
-                            submitBtn.innerText = originalText;
-                            submitBtn.disabled = false;
-                        }
-                    );
+                    // 成功：關閉 modal，顯示感謝彈窗（資料會在問卷完成後一起發送）
+                    closeSuggestModal();
+                    resetSurvey();
+                    document.getElementById('thankYouModal').classList.add('active');
+                    suggestForm.reset();
+                    submitBtn.innerText = originalText;
+                    submitBtn.disabled = false;
                 });
             }
         });
