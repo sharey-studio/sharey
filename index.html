@@ -1521,9 +1521,26 @@
         // Close thank you modal function
         function closeThankYouModal() {
             const thankYouModal = document.getElementById('thankYouModal');
+
+            // 如果用戶中途關閉（還沒完成問卷），也要發送已收集的資料
+            // 檢查是否有 email 資料且尚未發送
+            if (shareyUserData.email && currentSurveyStep < 4) {
+                // 保存目前已填寫的問卷答案
+                saveSurveyAnswers();
+                // 標記為中途離開
+                shareyUserData.form_type = shareyUserData.form_type + '_Incomplete';
+                // 發送已收集的資料
+                submitAllDataToGoogleSheet(
+                    () => console.log('Partial data submitted (user closed early)'),
+                    (error) => console.error('Partial submission error:', error)
+                );
+            }
+
             thankYouModal.classList.remove('active');
             // Reset survey
             resetSurvey();
+            // Reset user data
+            resetShareyUserData();
         }
 
         // Reset survey to initial state
