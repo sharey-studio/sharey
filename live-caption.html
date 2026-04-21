@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>即時字幕工具 - Live Caption</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: #0a0e27;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* 背景動畫 */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bg-circle {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .bg-circle:nth-child(1) {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, #3b82f6, transparent);
+            top: -100px;
+            right: -100px;
+        }
+
+        .bg-circle:nth-child(2) {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, #06b6d4, transparent);
+            bottom: -50px;
+            left: -50px;
+            animation-delay: -7s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-30px) scale(1.05); }
+        }
+
+        /* 主容器 */
+        .container {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        /* 標題列 */
+        .header {
+            text-align: center;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #3b82f6, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #94a3b8;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        /* 主字幕區 */
+        .caption-area {
+            flex-shrink: 0;
+            margin-top: 1.5rem;
+            padding: 2rem 2.5rem;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            min-height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .caption-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3b82f6, #06b6d4);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .caption-area.listening::before {
+            opacity: 1;
+        }
+
+        .caption-text {
+            font-size: 1.75rem;
+            font-weight: 500;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+
+        .caption-text .interim {
+            color: rgba(255, 255, 255, 0.45);
+        }
+
+        .caption-text .final {
+            color: #ffffff;
+        }
+
+        .caption-placeholder {
+            color: #64748b;
+            font-size: 1.25rem;
+        }
+
+        /* 歷史紀錄區 */
+        .history-section {
+            flex: 1;
+            margin-top: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .history-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .history-header h2 {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #94a3b8;
+        }
+
+        .history-count {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .history-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem 1.5rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+        }
+
+        .history-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .history-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .history-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 3px;
+        }
+
+        .history-item {
+            padding: 0.6rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            animation: fadeIn 0.3s ease;
+            display: flex;
+            gap: 0.75rem;
+            align-items: baseline;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-time {
+            font-size: 0.75rem;
+            color: #64748b;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .history-text {
+            font-size: 0.95rem;
+            color: #cbd5e1;
+            line-height: 1.5;
+        }
+
+        .history-empty {
+            text-align: center;
+            color: #475569;
+            padding: 3rem 0;
+            font-size: 0.9rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 控制列 */
+        .controls {
+            flex-shrink: 0;
+            margin-top: 1.25rem;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .controls-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #475569;
+            transition: background 0.3s;
+        }
+
+        .status-dot.listening {
+            background: #ef4444;
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .status-text {
+            color: #94a3b8;
+        }
+
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 10px;
+            border: none;
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, #3b82f6, #2563eb);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.35);
+        }
+
+        .btn-stop {
+            background: linear-gradient(90deg, #ef4444, #dc2626);
+            color: white;
+        }
+
+        .btn-stop:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: #94a3b8;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+        }
+
+        .btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        /* 不支援提示 */
+        .unsupported-banner {
+            display: none;
+            background: rgba(234, 179, 8, 0.15);
+            border: 1px solid rgba(234, 179, 8, 0.3);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            margin-top: 1.25rem;
+            color: #fbbf24;
+            font-size: 0.9rem;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        .unsupported-banner a {
+            color: #3b82f6;
+            text-decoration: underline;
+        }
+
+        /* 響應式 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 1.25rem;
+            }
+
+            .caption-area {
+                padding: 1.5rem 1.25rem;
+                min-height: 110px;
+            }
+
+            .caption-text {
+                font-size: 1.35rem;
+            }
+
+            .controls {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .controls-left {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .controls-right {
+                display: flex;
+                width: 100%;
+                gap: 0.5rem;
+            }
+
+            .controls-right .btn {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation">
+        <div class="bg-circle"></div>
+        <div class="bg-circle"></div>
+    </div>
+
+    <div class="container">
+        <!-- 標題 -->
+        <header class="header">
+            <h1>即時字幕工具</h1>
+            <p>Live Caption — 將語音即時轉換為文字</p>
+        </header>
+
+        <!-- 瀏覽器不支援提示 -->
+        <div class="unsupported-banner" id="unsupportedBanner">
+            你的瀏覽器不支援語音辨識功能。<br>
+            請使用 <a href="https://www.google.com/chrome/" target="_blank">Google Chrome</a> 或 Microsoft Edge 開啟此頁面。
+        </div>
+
+        <!-- 主字幕區 -->
+        <div class="caption-area" id="captionArea">
+            <div class="caption-placeholder" id="captionPlaceholder">
+                點擊下方「開始辨識」來啟動即時字幕
+            </div>
+            <div class="caption-text" id="captionText" style="display: none;"></div>
+        </div>
+
+        <!-- 歷史紀錄 -->
+        <div class="history-section">
+            <div class="history-header">
+                <h2>歷史紀錄</h2>
+                <span class="history-count" id="historyCount"></span>
+            </div>
+            <div class="history-list" id="historyList">
+                <div class="history-empty" id="historyEmpty">
+                    尚無紀錄，開始說話後會自動記錄在這裡
+                </div>
+            </div>
+        </div>
+
+        <!-- 控制列 -->
+        <div class="controls">
+            <div class="controls-left">
+                <div class="status-indicator">
+                    <div class="status-dot" id="statusDot"></div>
+                    <span class="status-text" id="statusText">待機中</span>
+                </div>
+            </div>
+            <div class="controls-right">
+                <button class="btn btn-primary" id="toggleBtn" onclick="toggleRecognition()">
+                    <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+                    開始辨識
+                </button>
+                <button class="btn btn-secondary" onclick="clearHistory()">
+                    清除紀錄
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== 瀏覽器支援檢測 =====
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (!SpeechRecognition) {
+            document.getElementById('unsupportedBanner').style.display = 'block';
+            document.getElementById('toggleBtn').disabled = true;
+            document.getElementById('toggleBtn').style.opacity = '0.5';
+            document.getElementById('toggleBtn').style.cursor = 'not-allowed';
+        }
+
+        // ===== 狀態變數 =====
+        let recognition = null;
+        let isListening = false;
+        let historyItems = [];
+
+        // ===== DOM 元素 =====
+        const captionArea = document.getElementById('captionArea');
+        const captionPlaceholder = document.getElementById('captionPlaceholder');
+        const captionText = document.getElementById('captionText');
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+        const toggleBtn = document.getElementById('toggleBtn');
+        const historyList = document.getElementById('historyList');
+        const historyEmpty = document.getElementById('historyEmpty');
+        const historyCount = document.getElementById('historyCount');
+
+        // ===== 初始化語音辨識 =====
+        function initRecognition() {
+            if (!SpeechRecognition) return;
+
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'zh-TW';
+
+            recognition.onresult = function(event) {
+                let interimTranscript = '';
+                let finalTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript;
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+
+                // 更新主字幕區
+                updateCaption(finalTranscript, interimTranscript);
+
+                // 將確認的文字加入歷史紀錄
+                if (finalTranscript.trim()) {
+                    addToHistory(finalTranscript.trim());
+                }
+            };
+
+            recognition.onend = function() {
+                // 如果還在聆聽狀態，自動重新啟動（瀏覽器有時會自動停止）
+                if (isListening) {
+                    try {
+                        recognition.start();
+                    } catch (e) {
+                        // 忽略已經啟動的錯誤
+                    }
+                }
+            };
+
+            recognition.onerror = function(event) {
+                if (event.error === 'no-speech') {
+                    // 沒有偵測到語音，不需特別處理
+                    return;
+                }
+                if (event.error === 'aborted') {
+                    return;
+                }
+                console.error('語音辨識錯誤:', event.error);
+                if (event.error === 'not-allowed') {
+                    setStatus('error', '麥克風權限被拒絕，請允許使用麥克風');
+                    stopRecognition();
+                }
+            };
+        }
+
+        // ===== 更新主字幕 =====
+        function updateCaption(finalText, interimText) {
+            const display = finalText || interimText;
+            if (!display) return;
+
+            captionPlaceholder.style.display = 'none';
+            captionText.style.display = 'block';
+
+            let html = '';
+            if (finalText) {
+                html += '<span class="final">' + escapeHtml(finalText) + '</span>';
+            }
+            if (interimText) {
+                html += '<span class="interim">' + escapeHtml(interimText) + '</span>';
+            }
+            captionText.innerHTML = html;
+        }
+
+        // ===== 歷史紀錄 =====
+        function addToHistory(text) {
+            const now = new Date();
+            const time = now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+            historyItems.push({ time, text });
+
+            historyEmpty.style.display = 'none';
+            historyCount.textContent = historyItems.length + ' 筆';
+
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            item.innerHTML = '<span class="history-time">' + time + '</span><span class="history-text">' + escapeHtml(text) + '</span>';
+
+            historyList.appendChild(item);
+
+            // 自動捲動到底部
+            historyList.scrollTop = historyList.scrollHeight;
+        }
+
+        function clearHistory() {
+            historyItems = [];
+            historyList.innerHTML = '<div class="history-empty" id="historyEmpty">尚無紀錄，開始說話後會自動記錄在這裡</div>';
+            historyCount.textContent = '';
+        }
+
+        // ===== 控制功能 =====
+        function toggleRecognition() {
+            if (isListening) {
+                stopRecognition();
+            } else {
+                startRecognition();
+            }
+        }
+
+        function startRecognition() {
+            if (!SpeechRecognition) return;
+
+            if (!recognition) {
+                initRecognition();
+            }
+
+            try {
+                recognition.start();
+                isListening = true;
+                setStatus('listening', '聆聽中');
+                captionArea.classList.add('listening');
+                toggleBtn.className = 'btn btn-stop';
+                toggleBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg> 停止辨識';
+            } catch (e) {
+                console.error('啟動失敗:', e);
+            }
+        }
+
+        function stopRecognition() {
+            if (recognition) {
+                isListening = false;
+                recognition.stop();
+            }
+            setStatus('idle', '待機中');
+            captionArea.classList.remove('listening');
+            toggleBtn.className = 'btn btn-primary';
+            toggleBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg> 開始辨識';
+        }
+
+        function setStatus(state, text) {
+            statusText.textContent = text;
+            statusDot.className = 'status-dot';
+            if (state === 'listening') {
+                statusDot.classList.add('listening');
+            }
+        }
+
+        // ===== 工具函數 =====
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ===== 鍵盤快捷鍵 =====
+        document.addEventListener('keydown', function(e) {
+            // 空白鍵切換辨識（防止在 input 中觸發）
+            if (e.code === 'Space' && e.target === document.body) {
+                e.preventDefault();
+                toggleRecognition();
+            }
+        });
+    </script>
+</body>
+</html>
